@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import ipily from 'ipily';
-const IP2Region = require('ip2region').default;
+import IP2Region from 'ip2region';
 import moment from 'moment';
 
 // This method is called when your extension is activated
@@ -21,8 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// Display a message box to the user
 		const ip = await ipily();
 		const query = new IP2Region();
-		const ipAddress: {country:string, province:string, city:string} = query.search(ip);
-		const {country} = ipAddress;
+		const ipAddress: {country:string, province:string, city:string} | null = query.search(ip);
+		const {country=''} = ipAddress || {};
 		vscode.window.showInformationMessage(`当前时间为：${moment().format('YYYY-MM-DD HH:mm:ss')}，当前位置为${country}`);
 	});
 
