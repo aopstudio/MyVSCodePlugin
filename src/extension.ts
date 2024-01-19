@@ -35,7 +35,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 
 	// register a command that is invoked when the status bar
 	// item is selected
-	const myCommandId = 'sample.showSelectionCount';
+	const myCommandId = 'myclock.showSelectionCount';
 
 	subscriptions.push(vscode.commands.registerCommand(myCommandId, async () => {
 		const time = getTime();
