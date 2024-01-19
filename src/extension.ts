@@ -39,8 +39,16 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 
 	subscriptions.push(vscode.commands.registerCommand(myCommandId, async () => {
 		const time = getTime();
-		const country = await getLocation();
-		vscode.window.showInformationMessage(`当前时间为：${time}，当前位置为${country}`);
+		// const country = await getLocation();
+		// vscode.window.showInformationMessage(`当前时间为：${time}，当前位置为${country}`);
+		const offTime = getOffTime();
+		const now = moment();
+		const sub_minute = offTime.diff(now,'minutes');
+		let prompt = '距离下班还有';
+		if(sub_minute<0){
+			prompt = '已经加班';
+		}
+		vscode.window.showInformationMessage(`当前时间为：${time}，${prompt}${Math.abs(sub_minute)}分钟`);
 	}));
 
 	// create a new status bar item that we can now manage
@@ -50,8 +58,8 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 
 	// register some listener that make sure the status bar 
 	// item always up-to-date
-	subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
-	subscriptions.push(vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem));
+	// subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
+	// subscriptions.push(vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem));
 
 	// update status bar item once at start
 	setInterval(updateStatusBarItem, 1000);
@@ -60,11 +68,32 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 
 function updateStatusBarItem(): void {
 	myStatusBarItem.text = getTime();
+	const offTime = getOffTime();
+	const now = moment();
+	const sub_minute = offTime.diff(now,'minutes');
+	const sub_second = offTime.diff(now,'second');
+	if(sub_second <= 0 && sub_second >= -10){
+		vscode.window.showInformationMessage(`该下班啦！`);
+	}
 	myStatusBarItem.show();
 }
 
 function getTime(): string {
 	return moment().format('YYYY-MM-DD HH:mm:ss');
+}
+
+function getOffTime(): moment.Moment {
+	const offHour:number = vscode.workspace.getConfiguration().get('clock.offHour')||22;
+	const onHour:number = vscode.workspace.getConfiguration().get('clock.onHour')||9;
+	const offMinute:number = vscode.workspace.getConfiguration().get('clock.offMinute')||0;
+	const now = moment();
+	const now_hour = now.hour();	// 获取当前小时，如果小于12，说明已经到了第二天，则下班时间要减1
+	let offTime = moment();
+	if(now_hour<onHour && now_hour<offHour){	// 当前时间超过半夜12点，计算下班时间日期得减1
+		offTime = offTime.subtract(1,'days');
+	}
+	offTime = offTime.hours(offHour).minutes(offMinute).seconds(0);
+	return offTime;
 }
 
 async function getLocation(): Promise<string> {
