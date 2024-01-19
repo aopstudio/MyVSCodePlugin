@@ -45,7 +45,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 		const now = moment();
 		const sub_minute = offTime.diff(now,'minutes');
 		let prompt = '距离下班还有';
-		if(sub_minute<0){
+		if(sub_minute<=0){
 			prompt = '已经加班';
 		}
 		vscode.window.showInformationMessage(`当前时间为：${time}，${prompt}${Math.abs(sub_minute)}分钟`);
