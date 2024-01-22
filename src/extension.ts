@@ -1,8 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import ipily from 'ipily';
-import IP2Region from 'ip2region';
 import moment from 'moment';
 
 // This method is called when your extension is activated
@@ -43,12 +41,12 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 		// vscode.window.showInformationMessage(`当前时间为：${time}，当前位置为${country}`);
 		const offTime = getOffTime();
 		const now = moment();
-		const sub_minute = offTime.diff(now,'minutes');
+		const sub_minute = offTime.diff(now,'minutes',true);
 		let prompt = '距离下班还有';
 		if(sub_minute<=0){
 			prompt = '已经加班';
 		}
-		vscode.window.showInformationMessage(`当前时间为：${time}，${prompt}${Math.abs(sub_minute)}分钟`);
+		vscode.window.showInformationMessage(`当前时间为：${time}，${prompt}${Math.abs(Math.round(sub_minute))}分钟`);
 	}));
 
 	// create a new status bar item that we can now manage
@@ -72,7 +70,8 @@ function updateStatusBarItem(): void {
 	const now = moment();
 	const sub_minute = offTime.diff(now,'minutes');
 	const sub_second = offTime.diff(now,'second');
-	if(sub_second <= 0 && sub_second >= -10){
+	const alert_count:number = vscode.workspace.getConfiguration().get('clock.alertCount')||5;
+	if(sub_second <= 0 && sub_second > (-alert_count)){
 		vscode.window.showInformationMessage(`该下班啦！`);
 	}
 	myStatusBarItem.show();
@@ -94,14 +93,6 @@ function getOffTime(): moment.Moment {
 	}
 	offTime = offTime.hours(offHour).minutes(offMinute).seconds(0);
 	return offTime;
-}
-
-async function getLocation(): Promise<string> {
-	const ip = await ipily();
-	const query = new IP2Region();
-	const ipAddress: {country:string, province:string, city:string} | null = query.search(ip);
-	const {country='',province='',city=''} = ipAddress || {};
-	return city||province||country;
 }
 
 // This method is called when your extension is deactivated

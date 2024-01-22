@@ -12,6 +12,9 @@
   "activationEvents": [
     "*"
   ],
+  "repository": {
+    "url": "https://github.com/aopstudio/MyVSCodePlugin"
+  },
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
@@ -212,6 +215,11 @@
           ],
           "default": 0,
           "description": "上班时间（分钟）"
+        },
+        "clock.alertCount": {
+          "type": "number",
+          "default": 5,
+          "description": "提醒次数"
         }
       }
     }
